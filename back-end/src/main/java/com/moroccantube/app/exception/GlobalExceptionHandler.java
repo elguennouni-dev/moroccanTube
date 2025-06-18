@@ -14,15 +14,16 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @ControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
-
-    // ---- Custom Exceptions ----
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleResourceNotFoundException(ResourceNotFoundException ex, WebRequest request) {
@@ -57,59 +58,54 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(OperationNotAllowedException.class)
     public ResponseEntity<ErrorResponse> handleOperationNotAllowedException(OperationNotAllowedException ex, WebRequest request) {
         ErrorResponse errorResponse = new ErrorResponse(
-                HttpStatus.FORBIDDEN, // Or BAD_REQUEST/UNPROCESSABLE_ENTITY depending on the specific rule
+                HttpStatus.FORBIDDEN,
                 ex.getMessage(),
                 ((ServletWebRequest) request).getRequest().getRequestURI()
         );
         return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
     }
 
-
-
-    // ---- Spring Validation Exception ----
-
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
             MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
 
-        Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getAllErrors().forEach((error) -> {
-            String fieldName = ((FieldError) error).getField();
-            String errorMessage = error.getDefaultMessage();
-            errors.put(fieldName, errorMessage);
-        });
+        Map<String, String> errors = ex.getBindingResult().getFieldErrors().stream()
+                .collect(Collectors.toMap(
+                        FieldError::getField,
+                        (fieldError) -> fieldError.getDefaultMessage() != null ? fieldError.getDefaultMessage() : "Invalid value"
+                ));
 
         ErrorResponse errorResponse = new ErrorResponse(
                 HttpStatus.BAD_REQUEST,
-                "Validation failed",
+                "Validation failed for request body.",
                 ((ServletWebRequest) request).getRequest().getRequestURI(),
                 errors
         );
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
-    // --- File Upload Exceptions ---
-    @ExceptionHandler(MaxUploadSizeExceededException.class)
-    public ResponseEntity<ErrorResponse> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException ex, WebRequest request) {
+    protected ResponseEntity<Object> handleNoHandlerFoundException(NoHandlerFoundException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
         ErrorResponse errorResponse = new ErrorResponse(
-                HttpStatus.PAYLOAD_TOO_LARGE,
-                "File size exceeds the maximum allowed limit.",
+                HttpStatus.NOT_FOUND,
+                "No API endpoint found for " + ex.getHttpMethod() + " " + ex.getRequestURL(),
                 ((ServletWebRequest) request).getRequest().getRequestURI()
         );
-        return new ResponseEntity<>(errorResponse, HttpStatus.PAYLOAD_TOO_LARGE);
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
 
-    // --- Generic Exception Handler ---
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleGenericException(Exception ex, WebRequest request) {
+    public ResponseEntity<ErrorResponse> handleAllUncaughtExceptions(Exception ex, WebRequest request) {
         ex.printStackTrace();
 
-        ErrorResponse errorResponse = new ErrorResponse(
-                HttpStatus.INTERNAL_SERVER_ERROR,
-                "An unexpected error occurred. Please try again later.",
-                ((ServletWebRequest) request).getRequest().getRequestURI()
-        );
-        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+        HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
+        String message = "An unexpected error occurred. Please try again later.";
+        String path = ((ServletWebRequest) request).getRequest().getRequestURI();
+
+        if (ex instanceof MaxUploadSizeExceededException) {
+            status = HttpStatus.PAYLOAD_TOO_LARGE;
+            message = "Uploaded file size exceeds the maximum allowed limit.";
+        }
+
+        ErrorResponse errorResponse = new ErrorResponse(status, message, path);
+        return new ResponseEntity<>(errorResponse, status);
     }
-
-
 }
