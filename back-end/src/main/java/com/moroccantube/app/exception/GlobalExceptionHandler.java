@@ -98,12 +98,10 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.PAYLOAD_TOO_LARGE);
     }
 
-    // --- Generic Exception Handler (Catch-all) ---
-    // IMPORTANT: Keep this as the last handler to ensure more specific handlers are preferred.
+    // --- Generic Exception Handler ---
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGenericException(Exception ex, WebRequest request) {
-        // Log the exception details for internal debugging (ex.printStackTrace() or logger.error)
-        ex.printStackTrace(); // For development, use a logger in production
+        ex.printStackTrace();
 
         ErrorResponse errorResponse = new ErrorResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR,
