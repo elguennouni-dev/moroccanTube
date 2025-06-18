@@ -1,0 +1,80 @@
+Application Entities :
+
+USER=> [
+id,username,password,email,fullname,enabled,videos(List<Video>),comments(List<Comment>),likes(List<Like>)
+]
+
+COMMENT=> [
+id,content,createdAt,video(videoId), user(userId)
+]
+
+LIKE=> [
+id,user(userId),video(videoId),likedAt
+]
+
+VIDEO=> [
+id,title,description,filename,contentType,size,uploadDate,user(userId),comments(List<Comment>),likes(List<Like>)
+]
+
+
+
+
+
+=======================================================================================================
+
+Authentication Endpoints
+
+    POST /api/auth/signup
+    POST /api/auth/login
+
+User Management Endpoints (Authorization Required)
+
+    GET /api/users/{username}
+    PUT /api/users/{userId}
+    GET /api/users/{username}/videos
+    GET /api/users/{username}/comments
+    GET /api/users/{username}/likes
+
+Video Management Endpoints (Authorization Required for Create/Update/Delete)
+
+    GET /api/videos
+    GET /api/videos/{videoId}
+    POST /api/videos
+    PUT /api/videos/{videoId}
+    DELETE /api/videos/{videoId}
+
+Comment Management Endpoints (Authorization Required for Create/Update/Delete)
+
+    GET /api/comments
+    GET /api/comments/{commentId}
+    POST /api/videos/{videoId}/comments
+    PUT /api/comments/{commentId}
+    DELETE /api/comments/{commentId}
+
+Like Management Endpoints (Authorization Required)
+
+    POST /api/videos/{videoId}/likes
+    DELETE /api/videos/{videoId}/likes
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
