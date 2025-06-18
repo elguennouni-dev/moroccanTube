@@ -1,0 +1,70 @@
+-----MVP-----
+- Signup/Login
+- Upload Vidos
+- View Videos
+- Likes / Comments
+
+
+
+=====FRONTEND=====
+Html + Css + JavaScript + TailwindCss
+
+=====BACKEND=====
+Spring Boot REST API
+
+=====Auth=====
+JWT(Token-based)
+
+=====Database=====
+PostgreSQL
+
+=====FileStorage=====
+Firebase(MVP)
+
+=====VideoHandling=====
+FFmpeg (Transcode thumbnails + preview )
+
+=====Hosting=====
+LOCAL
+
+
+------API STRUCTURE------
+api/auth/ (Login/Signup)
+api/videos/
+api/upload/
+/{id}
+/
+/{id}/like
+
+
+------FrontEnd------
+- Home (title + thumbnail + views)
+- Upload (Form: title + description + file)
+- Watch (Video Player + like + description)
+- Login/Register (Username/Password)
+
+
+======= MVP FEATURES =======
++ JWT (User Auth)
++ Form + Backend (Video Upload)
++ Firebase (File STorage)
++ Html5 Video (Stream Video)
++ One Per User (Like Button)
++ Auto-increment (View Count)
++ Pagination (Video List)
++ View without login (Public Access)
+
+
+======= Advanced Features (Not in MVP) =======
++ Comments
++ Tags & Categories
++ Search by tile
++ Dashboard
++ AI transcription & search
+
+
+
+
+
+
+
