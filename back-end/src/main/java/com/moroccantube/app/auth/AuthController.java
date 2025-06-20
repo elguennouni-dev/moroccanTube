@@ -38,69 +38,25 @@ public class AuthController {
     private JwtUtil jwtUtil;
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponseDto> login(@Valid @RequestBody AuthDao authDao) {
-        AuthResponseDto authResponseDto = authService.login(authDao);
-        return ResponseEntity.ok(authResponseDto);
+    public ResponseEntity<?> login(@Valid @RequestBody AuthDao authDao) {
+        return authService.hanldeLogin(authDao);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletRequest request) {
+        return authService.handleLogout(request);
     }
 
 
     @PostMapping("/refresh")
-    public ResponseEntity<Map<String, String>> refresh(HttpServletRequest request) {
-        String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("message", "Refresh token is missing or malformed."));
-        }
-
-        String refreshTokenString = authHeader.substring(7);
-
-        Optional<RefreshToken> refreshTokenOptional = refreshTokenService.verifyRefreshToken(refreshTokenString);
-
-        if (refreshTokenOptional.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("message", "Invalid or expired refresh token."));
-        }
-
-        RefreshToken oldRefreshToken = refreshTokenOptional.get();
-        User user = oldRefreshToken.getUser();
-
-        UserDetails userDetails = org.springframework.security.core.userdetails.User
-                .withUsername(user.getUsername())
-                .password(user.getPassword())
-                .build();
-
-        refreshTokenService.revokeToken(refreshTokenString);
-
-        String newAccessToken = jwtUtil.generateToken(userDetails);
-        String newRefreshToken = refreshTokenService.createRefreshToken(user);
-
-        Map<String, String> tokens = new HashMap<>();
-        tokens.put("accessToken", newAccessToken);
-        tokens.put("refreshToken", newRefreshToken);
-
-        return ResponseEntity.ok(tokens);
-    }
-
-
-    @PostMapping("/logout")
-    public ResponseEntity<?> logout(HttpServletRequest request) {
-        String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Map.of("message", "Refresh token is missing or invalid"));
-        }
-        String refreshTokenStr = authHeader.substring(7);
-        refreshTokenService.revokeToken(refreshTokenStr);
-        return ResponseEntity.ok(Map.of("message", "Logged out successfully"));
+    public ResponseEntity<?> refresh(HttpServletRequest request) {
+        return authService.handleRefreshToken(request);
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<UserDto> signup(@Valid @RequestBody SignupDao request) {
-        UserDto createdUserDto = authService.signup(request);
-        return new ResponseEntity<>(createdUserDto, HttpStatus.CREATED);
+    public ResponseEntity<?> signup(@Valid @RequestBody SignupDao request) {
+        return authService.signup(request);
     }
-
 
 
 }

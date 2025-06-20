@@ -1,27 +1,30 @@
 package com.moroccantube.app.dto;
 
+import com.moroccantube.app.model.Comment;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.UUID;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class VideoDto {
-
-    private Long id;
+    private UUID id;
     private String title;
     private String description;
     private String filename;
     private String contentType;
     private Long size;
     private LocalDateTime uploadDate;
-    private Long userId;
-    private String username;
-    private int commentCount;
-    private int likeCount;
-    private boolean likedByCurrentUser;
+    private Long duration;
+    private String uploaderUsername;
 
+    private List<Comment> comments;
+    private int likesCount;
+    private int commentsCount;
 }

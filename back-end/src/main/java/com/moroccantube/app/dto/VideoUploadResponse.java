@@ -1,4 +1,4 @@
-package com.moroccantube.app.dao;
+package com.moroccantube.app.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,10 +7,10 @@ import lombok.NoArgsConstructor;
 import java.util.UUID;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-public class CommentDao {
-    private String comment;
+@NoArgsConstructor
+public class VideoUploadResponse {
     private UUID videoId;
-    private String username;
+    private String title;
+    private String message;
 }

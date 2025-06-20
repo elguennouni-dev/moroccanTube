@@ -1,6 +1,7 @@
 package com.moroccantube.app.model;
 
 import jakarta.persistence.*;
+import lombok.Data;
 
 import java.time.LocalDateTime;
 
@@ -8,6 +9,7 @@ import java.time.LocalDateTime;
 @Table(name = "likes", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"user_id", "video_id"})
 })
+@Data
 public class Like {
 
     @Id
